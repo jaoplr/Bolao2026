@@ -704,7 +704,7 @@ function renderClassificacao(){
   let html=`<div class="info-banner"><b>${comRes}</b> de <b>${totalJogos}</b> jogos com resultado${comRes===0?' — aguardando jogos...':'.'}</div>`;
   html+=`<div class="rank-card">
       <div class="rank-card-title">🏆 Classificação ${periodoClass==='geral'?'Geral':fmtData(periodoClass)}</div>
-      <table class="rank-table"><thead><tr><th style="width:32px">#</th><th>Apostador</th><th class="r">Pts</th><th class="r">Jogos</th><th class="r">⭐5pts</th></tr></thead><tbody>`;
+      <table class="rank-table"><thead><tr><th style="width:32px">#</th><th>Apostador</th><th class="r">Pts</th><th class="r">Jogos</th><th class="r">⭐Placares cheios</th></tr></thead><tbody>`;
   ranking.forEach((r,i)=>{
     const pc=i===0?'p1':i===1?'p2':i===2?'p3':'',med=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
     html+=`<tr><td><span class="rank-pos ${pc}">${med||(i+1)}</span></td><td class="rank-nome">${r.nome}</td><td class="r rank-pts">${r.total}</td><td class="r rank-sub">${r.jogados}/${totalJogos}</td><td class="r rank-sub">${r.cheios}</td></tr>`;
