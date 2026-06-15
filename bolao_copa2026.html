@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão Copa do Mundo 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap');
+  :root {
+    --verde:#009C3B; --amarelo:#FFDF00; --azul:#002776;
+    --fundo:#0a0f1e; --fundo2:#111827; --fundo3:#1a2235;
+    --borda:#1e2d48; --texto:#e8eaf0; --texto2:#8896b0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Barlow',sans-serif;background:var(--fundo);color:var(--texto);min-height:100vh}
+
+  header{background:linear-gradient(135deg,var(--azul) 0%,#001a5e 50%,#000d2e 100%);border-bottom:3px solid var(--amarelo);padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,.6)}
+  .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:14px;height:56px}
+  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.25rem;color:var(--amarelo);letter-spacing:1px;white-space:nowrap}
+  .logo span{color:var(--verde)}
+  .api-status{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--texto2);padding:3px 10px;border-radius:20px;background:var(--fundo3);border:1px solid var(--borda);white-space:nowrap;cursor:pointer}
+  .api-status:hover{border-color:var(--amarelo)}
+  .api-dot{width:7px;height:7px;border-radius:50%;background:var(--texto2);flex-shrink:0}
+  .api-dot.ok{background:#34d399}
+  .api-dot.loading{background:var(--amarelo);animation:pulse 1s infinite}
+  .api-dot.err{background:#f87171}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  nav{display:flex;gap:3px;margin-left:auto}
+  .tab{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.5px;color:var(--texto2);background:none;border:none;padding:6px 13px;cursor:pointer;border-radius:6px;transition:all .2s;text-transform:uppercase}
+  .tab:hover{color:var(--texto);background:rgba(255,255,255,.06)}
+  .tab.active{color:var(--amarelo);background:rgba(255,223,0,.1)}
+
+  main{max-width:1400px;margin:0 auto;padding:18px}
+  .section{display:none}.section.active{display:block}
+
+  /* CONTROLES */
+  .controls{background:var(--fundo2);border:1px solid var(--borda);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+  .ctrl-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:160px}
+  .ctrl-group label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--texto2);display:flex;align-items:center;gap:8px}
+  .ctrl-clear{font-size:.62rem;color:var(--texto2);cursor:pointer;padding:1px 6px;border-radius:4px;border:1px solid var(--borda);background:var(--fundo3);transition:all .15s;white-space:nowrap}
+  .ctrl-clear:hover{color:#f87171;border-color:#f87171}
+  .clear-all-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;color:#f87171;cursor:pointer;padding:5px 12px;border-radius:6px;border:1px solid rgba(248,113,113,.4);background:rgba(248,113,113,.07);transition:all .15s;text-transform:uppercase;white-space:nowrap;align-self:flex-end}
+  .clear-all-btn:hover{background:rgba(248,113,113,.15);border-color:#f87171}
+  select,input[type="text"]{background:var(--fundo3);border:1px solid var(--borda);border-radius:8px;color:var(--texto);padding:8px 12px;font-size:.87rem;font-family:'Barlow',sans-serif;outline:none;transition:border-color .2s;width:100%}
+  select:focus,input[type="text"]:focus{border-color:var(--amarelo)}
+
+  /* PILLS apostadores */
+  .apostadores-wrap{display:flex;flex-wrap:wrap;gap:4px;max-height:100px;overflow-y:auto;padding:2px 0}
+  .pill{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:20px;border:1px solid var(--borda);background:var(--fundo3);color:var(--texto2);cursor:pointer;transition:all .15s;white-space:nowrap}
+  .pill:hover{border-color:var(--amarelo);color:var(--amarelo)}
+  .pill.selected{background:rgba(255,223,0,.12);border-color:var(--amarelo);color:var(--amarelo)}
+  .pill-all{background:var(--azul);border-color:var(--azul);color:var(--amarelo)}
+
+  /* DATAS */
+  .data-btns{display:flex;flex-wrap:wrap;gap:4px}
+  .data-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.72rem;padding:4px 9px;border-radius:6px;border:1px solid var(--borda);background:var(--fundo3);color:var(--texto2);cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .data-btn:hover,.data-btn.active{border-color:var(--amarelo);color:var(--amarelo);background:rgba(255,223,0,.08)}
+  .data-btn.hoje{border-color:var(--verde);color:var(--verde);background:rgba(0,156,59,.06)}
+  .data-btn.hoje.active{background:rgba(0,156,59,.18)}
+
+  /* FILTROS RESULTADO */
+  .filter-tags{display:flex;flex-wrap:wrap;gap:4px}
+  .ftag{font-size:.68rem;font-weight:600;padding:4px 8px;border-radius:20px;border:1px solid var(--borda);background:var(--fundo3);color:var(--texto2);cursor:pointer;transition:all .15s}
+  .ftag:hover,.ftag.active{border-color:var(--verde);color:var(--verde);background:rgba(0,156,59,.1)}
+
+  /* TABELA */
+  .dia-section{margin-bottom:26px}
+  .dia-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .dia-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.98rem;color:var(--amarelo);text-transform:uppercase;letter-spacing:1px}
+  .dia-line{flex:1;height:1px;background:var(--borda)}
+  .dia-count{font-size:.7rem;color:var(--texto2)}
+
+  .palpites-table-wrap{overflow-x:auto}
+  .palpites-table{width:100%;border-collapse:collapse;font-size:.79rem}
+  .palpites-table th{background:var(--fundo3);color:var(--texto2);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:6px 7px;text-align:center;border-bottom:2px solid var(--borda);white-space:nowrap}
+  .palpites-table th.left{text-align:left}
+  .palpites-table td{padding:5px 7px;text-align:center;border-bottom:1px solid rgba(30,45,72,.5);vertical-align:middle}
+  .palpites-table tr:hover td{background:rgba(255,255,255,.02)}
+
+  .hora-cell{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.78rem;color:var(--texto2);white-space:nowrap;min-width:52px}
+  .time-nome{text-align:left;white-space:nowrap;font-size:.81rem}
+  .placar-real{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;color:var(--texto);white-space:nowrap}
+  .placar-real.pendente{color:var(--texto2);font-size:.82rem}
+  .placar-real.ao-vivo{color:#f87171;animation:pulse 1.5s infinite}
+
+  .cell-palpite{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.86rem;padding:3px 5px;border-radius:5px;white-space:nowrap;min-width:44px}
+  .pts-badge{display:inline-block;font-size:.6rem;font-weight:700;padding:1px 4px;border-radius:3px;margin-left:2px;vertical-align:middle}
+  .pts-5{background:#22c55e;color:#000}
+  .pts-4{background:#FFD700;color:#000}
+  .pts-3{background:#ff9500;color:#000}
+  .pts-2{background:#60a5fa;color:#000}
+  .pts-1{background:#f20303;color:#000}
+  .pts-0{background:#4b5563;color:#9ca3af}
+  .pts-p{background:var(--fundo3);color:var(--texto2)}
+
+  .apostador-header{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:3px}
+
+  /* CLASSIFICAÇÃO */
+  .ranking-grid{display:block}
+  .rank-card{background:var(--fundo2);border:1px solid var(--borda);border-radius:12px;overflow:hidden}
+  .rank-card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.86rem;text-transform:uppercase;letter-spacing:1px;color:var(--amarelo);padding:11px 16px;background:var(--fundo3);border-bottom:1px solid var(--borda)}
+  .rank-table{width:100%;border-collapse:collapse}
+  .rank-table th{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--texto2);padding:7px 13px;text-align:left;border-bottom:1px solid var(--borda)}
+  .rank-table th.r{text-align:right}
+  .rank-table td{padding:7px 13px;border-bottom:1px solid rgba(30,45,72,.4);font-size:.82rem}
+  .rank-table td.r{text-align:right}
+  .rank-table tr:hover td{background:rgba(255,255,255,.02)}
+  .rank-pos{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;color:var(--texto2);width:28px;display:inline-block}
+  .rank-pos.p1{color:#FFD700}.rank-pos.p2{color:#C0C0C0}.rank-pos.p3{color:#CD7F32}
+  .rank-nome{font-weight:600}
+  .rank-pts{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.12rem;color:var(--amarelo)}
+  .rank-sub{font-size:.68rem;color:var(--texto2)}
+  .rank-table tr:nth-child(1) td{background:rgba(255,215,0,.03)}
+  .rank-table tr:nth-child(2) td{background:rgba(192,192,192,.02)}
+  .rank-table tr:nth-child(3) td{background:rgba(205,127,50,.02)}
+
+  .periodo-wrap{margin-bottom:16px;display:flex;gap:5px;flex-wrap:wrap}
+  .periodo-btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.76rem;padding:5px 11px;border-radius:6px;border:1px solid var(--borda);background:var(--fundo3);color:var(--texto2);cursor:pointer;text-transform:uppercase;transition:all .15s}
+  .periodo-btn:hover,.periodo-btn.active{border-color:var(--amarelo);color:var(--amarelo);background:rgba(255,223,0,.08)}
+
+  .empty{text-align:center;padding:36px;color:var(--texto2);font-size:.87rem}
+  .info-banner{background:rgba(255,223,0,.07);border:1px solid rgba(255,223,0,.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.8rem;color:var(--texto2)}
+  .info-banner b{color:var(--amarelo)}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo">⚽ BOLÃO <span>COPA 2026</span></div>
+    <div class="api-status" id="api-status" onclick="buscarResultados(true)" title="Clique para forçar atualização">
+      <span class="api-dot loading" id="api-dot"></span>
+      <span id="api-txt">Buscando...</span>
+    </div>
+    <nav>
+      <button class="tab active" onclick="showSection('palpites',this)">Palpites</button>
+      <button class="tab" onclick="showSection('classificacao',this)">Classificação</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- PALPITES -->
+<section id="sec-palpites" class="section active">
+  <div class="controls">
+    <div class="ctrl-group" style="flex:2;min-width:270px">
+      <label>Apostadores <span class="ctrl-clear" onclick="limparApostadores()">Limpar</span></label>
+      <div class="apostadores-wrap" id="pills-apostadores"></div>
+    </div>
+    <div class="ctrl-group" style="flex:2;min-width:250px">
+      <label>Data <span class="ctrl-clear" onclick="limparDatas()">Limpar</span></label>
+      <div class="data-btns" id="data-btns"></div>
+    </div>
+    <div class="ctrl-group">
+      <label>Resultado <span class="ctrl-clear" onclick="limparResultado()">Limpar</span></label>
+      <div class="filter-tags" id="filter-resultado">
+        <span class="ftag active" data-val="">Todos</span>
+        <span class="ftag" data-val="time1">Time 1 vence</span>
+        <span class="ftag" data-val="empate">Empate</span>
+        <span class="ftag" data-val="time2">Time 2 vence</span>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <label>Placar exato <span class="ctrl-clear" onclick="limparPlacar()">Limpar</span></label>
+      <input type="text" id="filter-placar" placeholder="ex: 2x1" oninput="renderPalpites()">
+    </div>
+    <div style="display:flex;align-items:flex-end">
+      <button class="clear-all-btn" onclick="limparTudo()">🗑 Limpar tudo</button>
+    </div>
+  </div>
+  <div id="palpites-content"></div>
+</section>
+
+<!-- CLASSIFICAÇÃO -->
+<section id="sec-classificacao" class="section">
+  <div class="periodo-wrap" id="periodo-wrap">
+    <button class="periodo-btn active" data-periodo="geral" onclick="selectPeriodo(this,'geral')">🏆 Geral</button>
+  </div>
+  <div id="class-content"></div>
+</section>
+</main>
+
+<script>
+// ============================================================
+// JOGOS — datas reais (horário de Brasília)
+// ============================================================
+const JOGOS = [
+  // 1ª RODADA
+  {id:1, t1:"México",          t2:"África do Sul",        data:"2026-06-11",hora:"16:00",local:"Cidade do México"},
+  {id:2, t1:"Coreia do Sul",   t2:"República Tcheca",     data:"2026-06-11",hora:"23:00",local:"Guadalajara"},
+  {id:3, t1:"Canadá",          t2:"Bósnia e Herzegovina", data:"2026-06-12",hora:"16:00",local:"Toronto"},
+  {id:4, t1:"Estados Unidos",  t2:"Paraguai",             data:"2026-06-12",hora:"22:00",local:"Los Angeles"},
+  {id:5, t1:"Austrália",       t2:"Turquia",              data:"2026-06-13",hora:"01:00",local:"Vancouver"},
+  {id:6, t1:"Catar",           t2:"Suíça",                data:"2026-06-13",hora:"16:00",local:"San Francisco"},
+  {id:7, t1:"Brasil",          t2:"Marrocos",             data:"2026-06-13",hora:"19:00",local:"Nova York/NJ"},
+  {id:8, t1:"Haiti",           t2:"Escócia",              data:"2026-06-13",hora:"22:00",local:"Boston"},
+  {id:9, t1:"Alemanha",        t2:"Curaçao",              data:"2026-06-14",hora:"14:00",local:"Houston"},
+  {id:10,t1:"Holanda",         t2:"Japão",                data:"2026-06-14",hora:"17:00",local:"Dallas"},
+  {id:11,t1:"Costa do Marfim", t2:"Equador",              data:"2026-06-14",hora:"20:00",local:"Filadélfia"},
+  {id:12,t1:"Suécia",          t2:"Tunísia",              data:"2026-06-14",hora:"23:00",local:"Monterrey"},
+  {id:13,t1:"Espanha",         t2:"Cabo Verde",           data:"2026-06-15",hora:"13:00",local:"Atlanta"},
+  {id:14,t1:"Bélgica",         t2:"Egito",                data:"2026-06-15",hora:"16:00",local:"Seattle"},
+  {id:15,t1:"Arábia Saudita",  t2:"Uruguai",              data:"2026-06-15",hora:"19:00",local:"Miami"},
+  {id:16,t1:"Irã",             t2:"Nova Zelândia",        data:"2026-06-15",hora:"22:00",local:"Los Angeles"},
+  {id:17,t1:"França",          t2:"Senegal",              data:"2026-06-16",hora:"16:00",local:"Nova York/NJ"},
+  {id:18,t1:"Iraque",          t2:"Noruega",              data:"2026-06-16",hora:"19:00",local:"Boston"},
+  {id:19,t1:"Argentina",       t2:"Argélia",              data:"2026-06-16",hora:"14:00",local:"Kansas City"},
+  {id:20,t1:"Áustria",         t2:"Jordânia",             data:"2026-06-17",hora:"01:00",local:"San Francisco"},
+  {id:21,t1:"Portugal",        t2:"RD Congo",             data:"2026-06-17",hora:"14:00",local:"Houston"},
+  {id:22,t1:"Inglaterra",      t2:"Croácia",              data:"2026-06-17",hora:"17:00",local:"Dallas"},
+  {id:23,t1:"Gana",            t2:"Panamá",               data:"2026-06-17",hora:"20:00",local:"Toronto"},
+  {id:24,t1:"Uzbequistão",     t2:"Colômbia",             data:"2026-06-17",hora:"23:00",local:"Cidade do México"},
+  // 2ª RODADA
+  {id:25,t1:"República Tcheca",t2:"África do Sul",        data:"2026-06-18",hora:"13:00",local:"Atlanta"},
+  {id:26,t1:"Suíça",           t2:"Bósnia e Herzegovina", data:"2026-06-18",hora:"16:00",local:"Los Angeles"},
+  {id:27,t1:"Canadá",          t2:"Catar",                data:"2026-06-18",hora:"19:00",local:"Vancouver"},
+  {id:28,t1:"México",          t2:"Coreia do Sul",        data:"2026-06-18",hora:"22:00",local:"Guadalajara"},
+  {id:29,t1:"Estados Unidos",  t2:"Austrália",            data:"2026-06-19",hora:"16:00",local:"Seattle"},
+  {id:30,t1:"Escócia",         t2:"Marrocos",             data:"2026-06-19",hora:"19:00",local:"Boston"},
+  {id:31,t1:"Brasil",          t2:"Haiti",                data:"2026-06-19",hora:"22:00",local:"Filadélfia"},
+  {id:32,t1:"Turquia",         t2:"Paraguai",             data:"2026-06-19",hora:"01:00",local:"San Francisco"},
+  {id:33,t1:"Holanda",         t2:"Suécia",               data:"2026-06-20",hora:"14:00",local:"Houston"},
+  {id:34,t1:"Alemanha",        t2:"Costa do Marfim",      data:"2026-06-20",hora:"17:00",local:"Toronto"},
+  {id:35,t1:"Equador",         t2:"Curaçao",              data:"2026-06-20",hora:"21:00",local:"Kansas City"},
+  {id:36,t1:"Tunísia",         t2:"Japão",                data:"2026-06-21",hora:"01:00",local:"Monterrey"},
+  {id:37,t1:"Espanha",         t2:"Arábia Saudita",       data:"2026-06-21",hora:"13:00",local:"Atlanta"},
+  {id:38,t1:"Bélgica",         t2:"Irã",                  data:"2026-06-21",hora:"16:00",local:"Los Angeles"},
+  {id:39,t1:"Uruguai",         t2:"Cabo Verde",           data:"2026-06-21",hora:"19:00",local:"Miami"},
+  {id:40,t1:"Nova Zelândia",   t2:"Egito",                data:"2026-06-21",hora:"22:00",local:"Vancouver"},
+  {id:41,t1:"Argentina",       t2:"Áustria",              data:"2026-06-22",hora:"14:00",local:"Dallas"},
+  {id:42,t1:"França",          t2:"Iraque",               data:"2026-06-22",hora:"18:00",local:"Filadélfia"},
+  {id:43,t1:"Noruega",         t2:"Senegal",              data:"2026-06-22",hora:"21:00",local:"Nova York/NJ"},
+  {id:44,t1:"Jordânia",        t2:"Argélia",              data:"2026-06-23",hora:"00:00",local:"San Francisco"},
+  {id:45,t1:"Portugal",        t2:"Uzbequistão",          data:"2026-06-23",hora:"14:00",local:"Houston"},
+  {id:46,t1:"Inglaterra",      t2:"Gana",                 data:"2026-06-23",hora:"17:00",local:"Boston"},
+  {id:47,t1:"Panamá",          t2:"Croácia",              data:"2026-06-23",hora:"20:00",local:"Toronto"},
+  {id:48,t1:"Colômbia",        t2:"RD Congo",             data:"2026-06-23",hora:"23:00",local:"Guadalajara"},
+  // 3ª RODADA
+  {id:49,t1:"Suíça",           t2:"Canadá",               data:"2026-06-24",hora:"16:00",local:"Vancouver"},
+  {id:50,t1:"Bósnia e Herzegovina",t2:"Catar",            data:"2026-06-24",hora:"16:00",local:"Seattle"},
+  {id:51,t1:"Brasil",          t2:"Escócia",              data:"2026-06-24",hora:"19:00",local:"Miami"},
+  {id:52,t1:"Marrocos",        t2:"Haiti",                data:"2026-06-24",hora:"19:00",local:"Atlanta"},
+  {id:53,t1:"África do Sul",   t2:"Coreia do Sul",        data:"2026-06-24",hora:"22:00",local:"Monterrey"},
+  {id:54,t1:"República Tcheca",t2:"México",               data:"2026-06-24",hora:"22:00",local:"Cidade do México"},
+  {id:55,t1:"Turquia",         t2:"Estados Unidos",       data:"2026-06-25",hora:"23:00",local:"Los Angeles"},
+  {id:56,t1:"Paraguai",        t2:"Austrália",            data:"2026-06-25",hora:"23:00",local:"San Francisco"},
+  {id:57,t1:"Equador",         t2:"Alemanha",             data:"2026-06-25",hora:"17:00",local:"Nova York/NJ"},
+  {id:58,t1:"Curaçao",         t2:"Costa do Marfim",      data:"2026-06-25",hora:"17:00",local:"Filadélfia"},
+  {id:59,t1:"Japão",           t2:"Suécia",               data:"2026-06-25",hora:"20:00",local:"Dallas"},
+  {id:60,t1:"Tunísia",         t2:"Holanda",              data:"2026-06-25",hora:"20:00",local:"Kansas City"},
+  {id:61,t1:"Egito",           t2:"Irã",                  data:"2026-06-27",hora:"00:00",local:"Seattle"},
+  {id:62,t1:"Nova Zelândia",   t2:"Bélgica",              data:"2026-06-27",hora:"00:00",local:"Vancouver"},
+  {id:63,t1:"Cabo Verde",      t2:"Arábia Saudita",       data:"2026-06-26",hora:"21:00",local:"Houston"},
+  {id:64,t1:"Uruguai",         t2:"Espanha",              data:"2026-06-26",hora:"21:00",local:"Guadalajara"},
+  {id:65,t1:"Noruega",         t2:"França",               data:"2026-06-26",hora:"16:00",local:"Boston"},
+  {id:66,t1:"Senegal",         t2:"Iraque",               data:"2026-06-26",hora:"16:00",local:"Toronto"},
+  {id:67,t1:"Jordânia",        t2:"Argentina",            data:"2026-06-27",hora:"23:00",local:"Dallas"},
+  {id:68,t1:"Argélia",         t2:"Áustria",              data:"2026-06-27",hora:"23:00",local:"Kansas City"},
+  {id:69,t1:"Colômbia",        t2:"Portugal",             data:"2026-06-27",hora:"20:30",local:"Miami"},
+  {id:70,t1:"RD Congo",        t2:"Uzbequistão",          data:"2026-06-27",hora:"20:30",local:"Atlanta"},
+  {id:71,t1:"Panamá",          t2:"Inglaterra",           data:"2026-06-27",hora:"18:00",local:"Nova York/NJ"},
+  {id:72,t1:"Croácia",         t2:"Gana",                 data:"2026-06-27",hora:"18:00",local:"Filadélfia"},
+];
+
+// ============================================================
+// APOSTADORES
+// ============================================================
+const APOSTADORES = [
+  {nome:"Abelardo Ribeiro dos Santos",palpites:[[0,1],[1,2],[2,2],[1,1],[0,2],[3,2],[0,1],[0,2],[2,0],[3,1],[2,2],[3,1],[2,0],[2,1],[0,2],[0,0],[2,0],[1,2],[4,1],[1,0],[3,0],[1,0],[0,1],[0,2],[2,2],[0,0],[1,0],[2,1],[2,0],[1,1],[3,0],[1,2],[2,0],[3,1],[2,0],[1,3],[3,2],[2,0],[1,0],[0,2],[2,0],[4,1],[2,1],[1,1],[2,0],[2,0],[0,1],[0,0],[1,0],[2,0],[2,0],[1,0],[1,1],[2,2],[0,1],[2,0],[0,3],[0,2],[1,1],[0,3],[1,0],[0,2],[0,0],[2,3],[1,3],[1,0],[0,2],[1,1],[1,2],[1,1],[0,3],[2,1]]},
+  {nome:"Ana Carolina Neves da Rocha Reis",palpites:[[2,1],[0,1],[1,1],[1,2],[2,3],[3,2],[0,1],[2,1],[3,0],[3,1],[2,2],[2,1],[4,0],[3,1],[2,3],[2,2],[3,1],[0,3],[3,0],[2,0],[4,1],[3,1],[2,2],[1,2],[2,2],[2,1],[1,1],[2,1],[2,2],[1,2],[4,1],[0,2],[3,1],[3,1],[2,0],[2,2],[2,1],[3,1],[2,0],[2,1],[3,1],[4,0],[3,1],[2,2],[4,0],[3,1],[1,2],[2,1],[2,1],[2,2],[3,0],[2,0],[2,2],[2,2],[1,2],[2,2],[1,3],[0,2],[1,2],[0,3],[1,1],[1,2],[0,2],[1,2],[2,3],[2,1],[0,3],[2,2],[1,3],[2,1],[1,3],[3,2]]},
+  {nome:"Ana Cristina Neves da Rocha Castro",palpites:[[2,0],[2,2],[2,0],[2,1],[0,2],[2,1],[0,3],[1,1],[5,0],[2,2],[1,2],[2,0],[3,0],[2,1],[0,2],[1,0],[3,1],[0,2],[3,1],[2,0],[4,0],[1,0],[2,1],[0,4],[1,1],[1,0],[2,0],[2,1],[2,1],[1,2],[3,0],[1,1],[2,1],[3,1],[3,0],[0,2],[3,0],[2,0],[3,1],[0,2],[2,0],[3,0],[1,1],[1,2],[2,0],[3,1],[0,1],[2,0],[1,2],[1,1],[2,0],[3,0],[1,1],[0,2],[0,2],[0,1],[1,2],[0,2],[1,1],[1,3],[1,1],[0,2],[1,2],[1,2],[0,2],[2,1],[0,3],[1,1],[0,2],[1,1],[0,2],[2,1]]},
+  {nome:"André Luiz Cerdeira de Gois",palpites:[[2,0],[1,2],[1,0],[1,0],[0,3],[2,1],[0,3],[1,2],[3,0],[1,1],[1,1],[3,0],[2,1],[2,2],[1,3],[0,0],[3,1],[0,3],[2,0],[0,0],[1,0],[1,1],[2,0],[0,2],[1,1],[2,1],[2,0],[2,1],[1,0],[1,3],[2,0],[1,1],[2,1],[1,1],[1,0],[0,3],[1,1],[1,1],[2,1],[0,0],[2,0],[3,0],[1,1],[0,0],[2,0],[1,2],[0,2],[2,0],[1,1],[1,0],[2,1],[3,0],[0,0],[1,2],[1,1],[1,1],[1,2],[0,2],[2,1],[0,3],[1,0],[0,2],[0,1],[2,2],[1,3],[2,0],[0,2],[1,1],[1,2],[2,2],[0,4],[2,2]]},
+  {nome:"André Neves da Rocha Castro",palpites:[[2,0],[1,1],[1,0],[1,2],[1,3],[2,1],[0,3],[0,2],[4,0],[2,1],[0,2],[1,0],[5,0],[2,1],[1,3],[0,0],[3,1],[0,3],[3,0],[2,0],[3,0],[2,2],[1,0],[0,3],[1,0],[2,0],[2,0],[1,1],[2,0],[1,2],[4,0],[1,1],[2,0],[2,0],[3,0],[0,3],[3,1],[4,1],[4,0],[0,1],[3,1],[6,0],[1,1],[0,1],[4,0],[3,2],[1,2],[3,1],[1,1],[2,0],[3,1],[3,1],[1,2],[0,1],[3,2],[2,0],[2,1],[0,1],[2,1],[0,3],[1,0],[0,3],[0,2],[2,2],[2,4],[3,0],[1,3],[0,1],[1,2],[1,1],[1,4],[3,1]]},
+  {nome:"Artur Campos Sasaki",palpites:[[2,0],[1,2],[1,1],[2,0],[0,3],[2,1],[0,3],[0,2],[5,0],[1,0],[0,1],[3,0],[3,0],[3,1],[1,1],[2,0],[3,1],[0,3],[2,0],[3,0],[5,0],[2,0],[2,1],[0,3],[2,0],[2,1],[2,0],[1,1],[2,0],[1,3],[4,0],[3,2],[2,1],[3,1],[3,1],[0,1],[3,1],[3,0],[3,0],[0,2],[2,1],[5,0],[3,1],[0,2],[4,1],[3,1],[0,2],[3,0],[2,1],[1,0],[3,1],[3,0],[1,2],[2,1],[2,2],[1,0],[1,2],[0,2],[2,1],[1,3],[1,1],[0,3],[0,2],[1,3],[0,2],[3,0],[0,3],[1,1],[1,2],[0,0],[0,4],[1,2]]},
+  {nome:"Carla Marzolla",palpites:[[2,1],[1,1],[1,2],[1,0],[0,1],[2,0],[0,2],[0,3],[3,0],[2,1],[1,1],[2,0],[3,0],[2,1],[1,2],[1,0],[3,1],[0,2],[3,0],[0,0],[3,0],[1,2],[2,0],[0,2],[0,1],[1,1],[2,0],[2,1],[1,0],[1,2],[3,0],[2,0],[2,2],[2,1],[2,0],[0,1],[3,1],[2,1],[2,0],[0,2],[2,0],[4,0],[1,1],[0,1],[2,0],[2,1],[0,2],[3,0],[0,0],[1,0],[2,0],[1,0],[1,0],[1,1],[2,0],[0,1],[0,2],[0,2],[2,1],[0,2],[2,0],[0,2],[0,1],[2,2],[1,3],[2,0],[0,3],[0,0],[1,2],[1,1],[0,2],[2,1]]},
+  {nome:"Cristiane Maria Neves da Rocha Reis",palpites:[[2,0],[1,0],[2,0],[3,1],[1,0],[1,0],[1,2],[1,0],[3,0],[0,2],[0,2],[2,0],[4,1],[3,1],[1,2],[0,1],[3,1],[0,2],[3,1],[2,0],[3,1],[3,0],[1,0],[0,2],[1,2],[2,0],[3,1],[2,1],[2,0],[2,2],[1,0],[0,1],[2,2],[3,1],[1,1],[0,2],[3,1],[2,0],[2,1],[1,0],[2,0],[3,0],[3,1],[1,1],[4,0],[3,0],[0,2],[0,0],[1,2],[0,0],[2,1],[2,1],[2,2],[1,2],[0,1],[1,2],[0,3],[0,2],[2,2],[0,2],[1,1],[0,2],[0,1],[0,1],[0,2],[1,0],[0,2],[0,0],[0,1],[0,0],[0,2],[1,0]]},
+  {nome:"Cristovam Leal Dantas Neves da Rocha",palpites:[[2,1],[0,2],[0,1],[2,1],[0,1],[2,0],[0,2],[1,1],[4,1],[3,2],[2,2],[2,0],[3,1],[2,1],[0,2],[2,0],[3,2],[0,3],[3,0],[2,0],[3,1],[3,2],[2,0],[0,2],[0,0],[1,0],[2,1],[2,1],[2,1],[1,2],[3,0],[0,2],[2,2],[3,1],[1,0],[1,2],[2,0],[1,0],[2,0],[0,2],[2,1],[3,1],[2,2],[1,3],[3,0],[2,0],[0,3],[2,0],[1,0],[2,1],[2,1],[2,0],[2,2],[0,1],[1,3],[2,1],[1,3],[0,3],[2,0],[1,2],[2,0],[0,2],[0,1],[1,1],[1,3],[2,0],[0,3],[2,2],[1,2],[1,0],[0,3],[2,1]]},
+  {nome:"Dorislei Novato Lauton",palpites:[[2,1],[1,1],[3,2],[1,0],[1,3],[3,2],[2,2],[1,1],[4,0],[2,1],[0,1],[2,0],[5,0],[2,0],[1,2],[1,1],[2,0],[1,2],[2,0],[2,0],[3,0],[1,1],[2,1],[0,2],[0,0],[2,1],[2,0],[2,1],[2,0],[1,1],[3,0],[1,1],[1,1],[2,1],[2,1],[1,2],[2,0],[3,0],[2,0],[1,2],[2,0],[3,0],[2,2],[2,3],[3,0],[2,0],[1,2],[2,0],[1,1],[2,1],[3,1],[2,0],[1,1],[1,2],[1,2],[1,0],[2,2],[1,2],[1,1],[0,3],[1,1],[0,3],[1,2],[1,2],[1,3],[2,0],[0,4],[1,2],[1,1],[2,2],[1,4],[2,1]]},
+  {nome:"Eduardo Nunes Neves da Rocha",palpites:[[3,1],[0,1],[0,0],[2,1],[0,1],[3,1],[0,3],[0,1],[4,1],[2,2],[0,1],[2,2],[3,0],[1,0],[0,1],[3,1],[2,0],[1,2],[1,2],[0,0],[4,0],[1,2],[2,1],[0,2],[1,1],[1,0],[2,1],[2,0],[2,1],[1,2],[4,1],[0,0],[1,0],[2,0],[1,0],[2,2],[3,1],[2,1],[3,1],[1,2],[3,0],[2,0],[2,2],[0,0],[2,0],[3,1],[1,2],[2,0],[2,2],[0,0],[2,1],[2,0],[1,1],[1,3],[2,2],[0,0],[2,2],[1,1],[1,1],[0,1],[0,1],[1,3],[0,0],[2,3],[0,2],[0,0],[0,3],[2,2],[1,2],[1,1],[0,2],[2,2]]},
+  {nome:"Elmano Silveira Castro Filho",palpites:[[2,1],[1,1],[0,3],[1,1],[0,2],[1,1],[0,3],[2,2],[5,0],[3,2],[2,1],[2,2],[6,0],[3,1],[1,2],[1,0],[3,2],[1,1],[1,1],[1,2],[3,1],[2,1],[2,0],[1,3],[2,2],[2,2],[1,0],[2,2],[1,1],[0,2],[4,1],[1,1],[1,0],[1,2],[3,0],[1,2],[3,1],[2,0],[2,0],[1,2],[2,0],[3,0],[0,0],[0,1],[2,0],[1,1],[0,2],[1,0],[1,0],[1,0],[2,1],[3,0],[1,2],[1,2],[0,1],[2,0],[1,2],[0,3],[2,2],[1,1],[2,2],[1,1],[0,2],[1,2],[0,3],[1,0],[1,3],[1,1],[3,3],[2,1],[1,4],[2,2]]},
+  {nome:"Felipe Cardoso Barros",palpites:[[2,1],[1,1],[2,2],[1,0],[0,2],[2,1],[0,2],[0,2],[6,0],[1,1],[1,1],[2,0],[7,0],[3,1],[1,2],[1,1],[2,0],[1,2],[1,0],[2,0],[3,0],[2,0],[2,0],[0,2],[2,1],[1,1],[1,0],[0,0],[2,0],[1,2],[4,0],[2,1],[3,1],[1,0],[3,0],[0,2],[3,1],[3,0],[2,0],[0,1],[2,1],[4,1],[1,1],[0,1],[4,0],[1,0],[0,3],[2,1],[0,0],[1,0],[1,0],[5,0],[0,1],[1,1],[1,0],[1,0],[1,2],[1,3],[1,0],[0,3],[1,0],[0,4],[0,2],[0,2],[2,2],[3,0],[0,5],[0,1],[1,2],[2,1],[0,6],[2,1]]},
+  {nome:"Gabriel Neves da Rocha Castro",palpites:[[2,0],[1,1],[1,1],[2,0],[0,3],[2,2],[0,3],[0,3],[3,0],[2,2],[2,1],[2,0],[4,0],[2,0],[0,2],[2,1],[2,0],[0,2],[3,0],[2,0],[2,0],[2,0],[2,0],[0,2],[2,1],[2,0],[2,0],[2,1],[2,0],[0,2],[4,0],[2,1],[2,0],[2,1],[2,0],[0,3],[3,0],[3,0],[2,0],[0,1],[3,1],[5,0],[0,2],[0,2],[3,1],[3,0],[0,2],[2,1],[2,1],[2,1],[1,0],[3,0],[0,2],[2,2],[1,1],[1,2],[1,3],[0,3],[2,1],[0,3],[1,2],[0,3],[0,2],[1,2],[0,3],[2,0],[0,3],[0,2],[0,2],[2,1],[0,3],[2,2]]},
+  {nome:"Gilberto Maltez Garrido Filho",palpites:[[2,1],[2,2],[2,1],[1,0],[1,3],[2,0],[1,2],[1,2],[5,0],[2,2],[0,2],[2,0],[6,0],[3,0],[1,2],[1,1],[2,0],[1,2],[3,1],[2,1],[5,0],[2,1],[4,2],[0,2],[2,1],[1,1],[2,0],[2,1],[2,0],[1,1],[5,0],[1,1],[1,1],[3,0],[5,1],[1,2],[5,0],[4,0],[3,1],[3,2],[2,0],[3,0],[3,2],[2,2],[5,0],[2,0],[1,4],[2,0],[2,1],[2,1],[2,0],[2,0],[1,1],[1,2],[1,2],[1,0],[3,2],[2,1],[2,2],[0,3],[1,1],[0,3],[1,1],[1,4],[1,3],[2,0],[0,4],[0,2],[1,1],[2,2],[1,4],[1,1]]},
+  {nome:"Giulia Ferreira",palpites:[[3,0],[1,2],[2,0],[2,1],[1,2],[3,2],[0,2],[1,1],[4,0],[3,3],[0,1],[1,0],[5,2],[2,1],[0,3],[2,0],[2,0],[1,2],[4,0],[3,1],[1,0],[3,3],[0,0],[1,2],[4,2],[3,0],[2,1],[3,3],[2,1],[1,3],[4,0],[2,0],[3,1],[3,0],[2,0],[1,2],[3,1],[2,1],[2,3],[1,1],[2,1],[3,0],[1,2],[0,2],[4,0],[3,1],[0,2],[1,0],[2,2],[1,0],[2,1],[4,1],[1,3],[0,1],[2,2],[1,2],[2,3],[2,5],[1,1],[0,3],[1,0],[1,3],[2,1],[1,2],[1,3],[2,1],[0,3],[2,2],[2,3],[0,0],[1,4],[2,1]]},
+  {nome:"Heliana Maria Neves da Rocha Ribeiro dos Santos",palpites:[[2,0],[1,1],[0,3],[1,2],[0,2],[3,1],[0,3],[1,1],[3,1],[2,2],[1,3],[2,0],[3,0],[2,1],[0,3],[1,1],[2,0],[2,2],[2,0],[3,1],[2,0],[1,1],[0,0],[0,1],[2,0],[1,1],[0,0],[2,1],[1,0],[2,2],[4,1],[0,2],[3,1],[3,0],[2,0],[1,3],[2,1],[2,0],[3,0],[0,2],[3,0],[2,0],[0,0],[1,1],[2,0],[1,0],[1,2],[2,2],[2,0],[1,1],[2,1],[2,0],[1,1],[2,2],[2,1],[1,0],[2,3],[0,0],[2,2],[1,3],[2,0],[0,2],[0,0],[2,1],[1,3],[1,1],[0,2],[2,2],[0,1],[0,0],[0,2],[3,1]]},
+  {nome:"Hiram Reis Filho",palpites:[[3,0],[1,1],[1,2],[2,1],[0,2],[3,1],[0,4],[0,2],[5,0],[2,2],[1,3],[2,0],[4,0],[3,2],[1,2],[2,2],[3,0],[0,2],[3,1],[1,0],[2,0],[2,2],[2,0],[1,2],[1,0],[2,1],[2,0],[2,2],[2,1],[1,1],[4,0],[1,3],[3,3],[3,0],[2,0],[1,2],[5,0],[2,0],[2,0],[2,2],[2,1],[3,1],[2,2],[0,2],[3,1],[2,2],[0,2],[2,0],[1,1],[2,0],[2,1],[2,0],[1,2],[2,2],[1,1],[2,0],[1,3],[0,2],[1,1],[1,2],[2,0],[1,2],[2,0],[1,2],[0,2],[3,1],[0,4],[2,1],[0,0],[2,0],[0,2],[2,1]]},
+  {nome:"Hiram Reis Neto",palpites:[[2,1],[0,0],[1,0],[2,0],[0,1],[2,1],[0,0],[0,1],[3,0],[1,1],[0,0],[2,0],[3,0],[2,1],[0,2],[0,0],[4,0],[0,1],[3,0],[0,0],[3,0],[1,1],[0,0],[0,1],[0,1],[1,0],[1,0],[1,1],[1,0],[0,1],[3,0],[1,0],[0,0],[2,0],[1,0],[0,1],[4,1],[1,0],[2,0],[0,2],[2,0],[4,0],[1,1],[0,0],[3,0],[1,1],[0,2],[1,0],[0,0],[0,0],[3,0],[1,0],[0,0],[0,1],[2,1],[1,0],[1,2],[0,0],[1,2],[0,1],[1,0],[0,1],[0,0],[2,3],[1,2],[0,0],[0,2],[0,0],[1,1],[0,0],[0,2],[2,0]]},
+  {nome:"Igor Marzolla Costa Pinto",palpites:[[2,0],[1,1],[2,1],[2,0],[0,2],[2,1],[0,2],[1,2],[3,0],[1,1],[1,1],[2,0],[3,0],[2,1],[0,2],[2,0],[1,1],[0,3],[2,0],[3,0],[3,0],[1,1],[2,0],[0,2],[2,1],[1,0],[2,0],[2,1],[2,0],[0,1],[3,0],[2,1],[1,1],[2,1],[3,0],[0,2],[3,0],[2,0],[3,0],[0,2],[2,1],[3,0],[1,1],[0,2],[3,0],[2,0],[0,2],[2,0],[1,1],[2,1],[2,0],[3,0],[1,2],[1,1],[1,2],[1,1],[1,1],[0,2],[1,1],[0,2],[1,1],[0,3],[1,1],[1,1],[1,2],[2,0],[0,3],[1,2],[1,1],[1,1],[0,3],[2,1]]},
+  {nome:"Ilka Peltier de Queiroz Neves da Rocha",palpites:[[2,1],[2,0],[1,0],[1,2],[3,1],[2,1],[3,1],[2,0],[3,0],[3,2],[3,1],[3,1],[4,1],[2,2],[2,2],[1,1],[3,1],[0,2],[3,1],[2,0],[4,1],[1,1],[2,0],[1,3],[1,2],[1,1],[0,2],[3,2],[1,0],[0,4],[3,1],[2,1],[3,1],[1,2],[1,0],[1,3],[4,2],[1,0],[3,1],[1,1],[3,1],[2,0],[2,2],[2,3],[3,0],[2,1],[1,3],[4,1],[2,2],[1,3],[3,0],[3,2],[0,2],[0,3],[0,1],[2,1],[2,2],[1,4],[3,0],[0,2],[1,3],[0,1],[1,2],[1,3],[1,3],[4,0],[1,4],[3,1],[2,3],[2,0],[1,1],[1,2]]},
+  {nome:"Isabel Fernandes",palpites:[[2,1],[3,1],[2,0],[1,1],[0,1],[2,1],[0,0],[1,1],[3,1],[2,2],[1,1],[2,0],[3,0],[3,1],[0,2],[0,0],[2,1],[0,1],[3,1],[1,1],[2,1],[2,3],[2,0],[0,3],[0,2],[4,0],[2,2],[1,1],[0,0],[1,2],[2,0],[3,2],[1,1],[5,1],[1,0],[1,2],[4,2],[3,0],[2,0],[1,2],[3,1],[4,0],[2,1],[0,0],[2,0],[3,1],[2,2],[2,1],[2,2],[0,1],[3,1],[2,0],[1,1],[0,2],[2,2],[1,3],[0,2],[1,1],[3,2],[0,2],[2,0],[1,3],[3,3],[2,3],[2,4],[1,0],[0,2],[0,1],[1,2],[2,0],[3,3],[2,0]]},
+  {nome:"João Pedro Lima Ribeiro",palpites:[[2,1],[2,1],[2,0],[2,1],[0,2],[2,1],[1,3],[1,1],[5,0],[2,1],[1,1],[2,1],[4,0],[2,1],[1,3],[2,0],[2,1],[0,2],[3,0],[2,0],[3,0],[2,1],[1,1],[0,3],[1,1],[3,1],[2,0],[1,1],[2,1],[0,2],[3,0],[1,1],[2,1],[3,1],[2,0],[0,1],[3,0],[2,0],[3,0],[1,2],[3,1],[4,0],[2,2],[1,2],[4,0],[3,0],[1,2],[2,0],[2,1],[2,1],[2,0],[4,0],[1,2],[1,2],[1,2],[1,1],[1,2],[0,3],[1,1],[1,3],[1,1],[0,2],[1,2],[1,2],[1,3],[2,0],[1,3],[2,1],[1,1],[2,1],[0,2],[2,0]]},
+  {nome:"João Pedro Santos Cruz",palpites:[[2,0],[1,1],[1,0],[2,0],[0,1],[1,0],[0,1],[0,1],[2,0],[1,2],[1,0],[1,0],[2,0],[1,0],[1,1],[2,0],[1,0],[0,1],[2,0],[2,0],[3,0],[1,0],[1,0],[0,1],[1,1],[2,0],[2,0],[1,1],[1,0],[1,2],[2,0],[1,0],[1,0],[2,1],[1,0],[0,1],[2,0],[2,0],[2,0],[0,1],[1,0],[1,0],[1,1],[0,1],[2,0],[2,0],[0,1],[1,0],[1,0],[1,0],[1,0],[1,0],[1,1],[1,1],[1,1],[1,0],[1,2],[0,1],[1,0],[0,2],[1,0],[0,1],[0,1],[1,2],[1,2],[2,0],[0,2],[1,1],[1,2],[1,1],[0,2],[2,1]]},
+  {nome:"Julia Claret Rodrigues Tomeo",palpites:[[2,0],[2,1],[3,1],[0,1],[1,1],[2,1],[0,1],[1,1],[3,1],[2,1],[0,1],[0,1],[4,1],[2,0],[0,1],[1,2],[3,1],[0,0],[3,0],[0,0],[2,0],[1,1],[3,1],[1,4],[1,1],[2,1],[0,1],[3,0],[1,0],[0,1],[2,0],[1,2],[1,0],[3,2],[2,2],[0,1],[2,0],[1,0],[1,0],[1,2],[2,0],[3,1],[1,1],[1,0],[0,1],[2,1],[1,2],[2,0],[1,1],[0,1],[3,1],[2,0],[0,1],[0,1],[1,2],[2,1],[1,3],[1,1],[0,1],[0,2],[1,0],[1,0],[0,1],[1,2],[1,3],[1,1],[0,3],[2,2],[0,1],[1,1],[1,2],[2,1]]},
+  {nome:"Juliana Neves da Rocha Castro",palpites:[[2,0],[1,1],[1,1],[2,1],[0,2],[2,1],[0,2],[1,1],[3,0],[1,1],[1,1],[1,0],[2,0],[1,1],[1,2],[2,0],[2,1],[0,2],[1,2],[2,0],[2,0],[1,1],[2,1],[0,2],[2,1],[1,1],[2,0],[1,1],[1,1],[1,2],[3,0],[0,2],[2,1],[2,1],[0,2],[0,2],[3,0],[2,0],[2,0],[1,2],[2,1],[3,0],[2,2],[0,2],[2,0],[2,1],[0,2],[2,1],[2,1],[2,0],[2,1],[3,0],[0,1],[1,2],[1,2],[1,1],[1,1],[0,2],[2,1],[0,2],[1,1],[0,3],[1,2],[1,1],[1,1],[2,0],[0,3],[1,1],[1,1],[1,1],[0,2],[1,0]]},
+  {nome:"Leonardo dos Santos Gonzaga",palpites:[[2,0],[1,0],[1,0],[1,1],[0,2],[2,1],[0,1],[0,2],[3,0],[2,2],[1,2],[1,1],[3,0],[2,1],[0,2],[0,0],[2,0],[1,3],[2,0],[2,0],[4,0],[2,1],[2,0],[0,3],[0,0],[2,0],[1,0],[2,1],[2,1],[1,3],[3,0],[3,2],[1,0],[2,1],[2,0],[0,2],[3,0],[3,0],[2,0],[0,2],[2,0],[4,0],[2,0],[0,0],[3,0],[2,0],[1,4],[3,0],[3,2],[1,1],[2,0],[3,0],[0,1],[1,2],[2,1],[1,0],[1,3],[0,2],[1,0],[1,2],[2,0],[0,3],[1,1],[1,2],[1,3],[1,0],[0,3],[1,2],[1,2],[0,0],[0,4],[1,0]]},
+  {nome:"Leonardo Rocha",palpites:[[2,0],[1,1],[2,1],[0,0],[0,2],[2,1],[0,2],[0,1],[5,0],[2,1],[1,2],[1,0],[6,0],[3,1],[0,2],[0,0],[3,1],[0,2],[3,0],[2,0],[4,0],[1,1],[2,0],[0,2],[2,1],[2,1],[2,0],[1,1],[1,0],[2,2],[4,0],[2,1],[1,1],[2,1],[3,1],[0,2],[3,0],[2,0],[3,1],[1,1],[2,0],[5,0],[3,2],[0,2],[5,0],[2,1],[0,2],[2,0],[2,1],[2,1],[1,0],[3,1],[0,0],[0,2],[1,1],[1,1],[1,1],[1,3],[2,2],[0,3],[1,0],[0,2],[1,1],[1,2],[1,3],[2,0],[0,4],[1,0],[1,2],[1,2],[0,3],[2,1]]},
+  {nome:"Leticia Negrao de Sousa",palpites:[[2,1],[0,1],[1,1],[1,1],[0,2],[1,0],[0,2],[1,1],[3,0],[2,0],[1,2],[2,1],[3,0],[2,1],[1,3],[0,0],[2,0],[1,1],[2,0],[2,1],[1,0],[1,1],[2,0],[0,2],[0,1],[1,0],[2,0],[2,2],[1,1],[2,1],[2,0],[0,0],[2,1],[2,0],[2,1],[0,1],[3,0],[3,1],[2,0],[1,1],[2,1],[3,0],[1,2],[0,0],[1,0],[2,0],[1,2],[2,0],[2,1],[2,1],[1,1],[2,1],[1,0],[1,1],[1,1],[0,1],[1,2],[0,0],[2,1],[1,1],[1,1],[1,1],[1,0],[1,1],[1,3],[2,0],[0,2],[1,1],[1,2],[2,2],[1,2],[0,1]]},
+  {nome:"Leticia Neves da Rocha Ribeiro dos Santos",palpites:[[3,0],[2,1],[2,0],[2,2],[0,3],[2,1],[2,3],[0,2],[5,0],[3,0],[2,1],[2,0],[4,0],[2,0],[0,3],[0,1],[3,1],[0,2],[2,0],[1,1],[3,0],[2,1],[2,0],[0,2],[2,1],[2,2],[1,0],[2,1],[1,0],[0,3],[3,0],[2,0],[3,1],[4,1],[3,0],[0,4],[4,1],[3,0],[4,0],[0,2],[3,1],[4,1],[3,2],[0,2],[2,0],[4,1],[0,2],[3,1],[1,1],[2,1],[3,0],[3,0],[1,2],[1,2],[0,2],[1,1],[1,3],[0,2],[1,1],[0,3],[2,1],[0,3],[1,2],[1,3],[1,3],[2,1],[0,2],[2,2],[0,3],[1,1],[1,4],[2,0]]},
+  {nome:"Lucas Felix",palpites:[[4,0],[0,0],[1,0],[0,3],[1,1],[1,0],[0,0],[1,0],[5,1],[3,2],[1,4],[0,0],[4,0],[3,0],[0,2],[0,0],[3,0],[1,1],[2,0],[0,0],[2,1],[4,3],[2,1],[0,3],[3,1],[1,1],[1,1],[3,1],[2,1],[1,0],[3,0],[0,0],[1,0],[1,0],[1,0],[0,0],[1,0],[0,0],[1,0],[1,1],[2,1],[1,0],[0,1],[0,0],[0,0],[1,0],[2,0],[2,0],[1,1],[1,0],[2,0],[0,0],[1,2],[1,2],[1,3],[3,1],[2,1],[1,1],[1,0],[0,0],[1,0],[1,1],[0,0],[1,1],[0,0],[0,0],[1,4],[1,1],[3,2],[1,1],[0,0],[2,0]]},
+  {nome:"Luciane de Albuquerque Melo Figueiredo",palpites:[[1,2],[0,0],[1,0],[2,2],[1,0],[2,0],[0,0],[0,2],[3,0],[1,1],[3,2],[2,0],[2,2],[1,0],[2,3],[0,1],[2,3],[0,0],[3,0],[1,2],[3,0],[4,2],[1,0],[0,2],[1,3],[1,0],[0,2],[3,3],[3,1],[1,2],[2,1],[1,2],[3,0],[4,1],[1,1],[1,2],[3,2],[1,0],[3,0],[1,0],[4,0],[2,1],[1,0],[0,0],[2,0],[3,0],[2,2],[1,0],[1,0],[0,1],[2,0],[2,2],[2,2],[0,2],[0,3],[1,1],[0,1],[0,2],[1,2],[0,2],[1,1],[0,2],[2,2],[2,4],[1,0],[1,1],[0,2],[0,1],[1,3],[0,0],[1,4],[1,1]]},
+  {nome:"Lôbos",palpites:[[2,1],[0,1],[1,1],[0,3],[0,0],[2,0],[1,1],[1,2],[2,0],[1,2],[0,2],[1,0],[3,0],[2,0],[0,3],[1,0],[2,0],[1,0],[2,0],[1,1],[2,0],[1,2],[1,0],[0,2],[1,1],[1,0],[1,1],[2,0],[1,1],[2,0],[2,0],[1,3],[2,1],[3,0],[0,0],[0,1],[2,0],[2,1],[3,0],[1,2],[3,1],[2,0],[1,1],[0,0],[3,0],[2,0],[0,2],[2,0],[1,0],[1,0],[2,0],[1,0],[1,1],[0,2],[1,1],[2,0],[0,2],[1,0],[1,0],[0,2],[1,0],[0,1],[1,1],[1,2],[0,2],[1,1],[0,2],[0,1],[1,2],[1,1],[0,2],[2,0]]},
+  {nome:"Lúcio Ângelo Hora Alves",palpites:[[2,1],[3,2],[2,2],[1,2],[3,1],[2,1],[1,1],[1,3],[2,0],[3,3],[1,2],[2,2],[3,0],[2,2],[1,3],[1,1],[3,2],[2,2],[2,1],[1,1],[3,0],[2,2],[2,0],[1,3],[1,1],[1,1],[2,0],[2,1],[1,1],[0,3],[3,0],[2,2],[3,1],[3,0],[2,1],[1,1],[3,2],[3,2],[3,1],[0,0],[2,1],[2,0],[2,1],[3,3],[2,0],[2,1],[0,2],[1,1],[1,2],[1,1],[3,0],[2,1],[2,3],[1,2],[1,1],[2,2],[1,2],[0,0],[2,1],[2,3],[2,2],[2,2],[1,3],[2,2],[1,2],[0,1],[1,2],[1,1],[1,3],[1,1],[0,1],[3,2]]},
+  {nome:"Marcio Brasil",palpites:[[2,1],[1,2],[2,0],[2,0],[0,2],[2,1],[0,2],[1,2],[4,0],[2,1],[2,1],[1,2],[4,0],[3,0],[0,2],[1,0],[3,0],[0,2],[3,0],[2,0],[3,0],[2,1],[1,2],[0,2],[2,0],[2,1],[3,0],[2,1],[2,1],[0,2],[4,0],[2,1],[2,1],[3,1],[3,0],[1,1],[3,0],[3,0],[2,0],[0,1],[2,1],[4,0],[1,1],[1,0],[3,0],[3,0],[1,2],[3,0],[1,1],[1,0],[3,0],[3,0],[1,1],[1,2],[1,2],[1,1],[1,3],[1,0],[2,1],[0,2],[1,0],[0,3],[1,0],[0,2],[1,2],[2,0],[0,3],[1,1],[1,2],[2,0],[0,3],[2,0]]},
+  {nome:"Marcos Andrade",palpites:[[2,0],[2,1],[3,0],[2,2],[1,3],[2,1],[2,2],[1,2],[3,0],[2,2],[1,1],[3,1],[4,0],[2,1],[2,2],[2,2],[3,1],[0,4],[3,1],[2,0],[3,0],[2,1],[2,2],[1,2],[1,1],[4,0],[2,0],[1,1],[1,2],[0,2],[4,0],[1,1],[2,2],[3,2],[2,0],[2,2],[4,1],[3,0],[4,1],[1,1],[2,2],[3,1],[4,1],[1,1],[3,0],[2,0],[0,3],[4,0],[0,0],[2,2],[4,0],[3,1],[1,2],[2,3],[2,1],[1,2],[2,3],[1,2],[2,2],[1,3],[2,1],[1,3],[1,4],[1,2],[1,3],[2,2],[0,3],[1,2],[1,3],[3,3],[1,5],[3,0]]},
+  {nome:"Maria Eugênia / Ivana / Fábio",palpites:[[1,2],[0,1],[0,0],[2,1],[0,2],[2,0],[0,1],[1,1],[2,1],[2,2],[1,1],[2,0],[3,1],[1,0],[2,2],[0,1],[3,2],[1,1],[2,0],[0,0],[3,1],[1,2],[1,1],[0,1],[0,2],[1,1],[2,0],[3,2],[2,0],[1,0],[3,1],[0,1],[2,2],[3,2],[0,1],[0,0],[2,1],[1,0],[2,0],[1,1],[2,1],[2,0],[2,2],[1,1],[2,0],[1,2],[0,3],[0,0],[1,1],[0,2],[2,0],[1,0],[1,0],[0,2],[1,2],[1,3],[0,2],[1,1],[0,0],[0,1],[2,2],[2,2],[1,1],[1,1],[0,2],[1,0],[0,1],[0,0],[0,2],[1,1],[0,2],[3,1]]},
+  {nome:"Maria Teresa Neves da Rocha Lobo",palpites:[[2,0],[2,1],[1,1],[1,1],[0,3],[2,1],[1,2],[0,2],[4,0],[1,1],[1,1],[2,0],[3,1],[2,0],[0,1],[3,1],[3,1],[0,3],[2,1],[3,1],[2,0],[2,2],[1,2],[1,2],[2,1],[2,1],[2,0],[2,2],[2,1],[0,1],[3,1],[2,1],[3,1],[1,0],[2,0],[0,1],[2,0],[5,2],[2,2],[0,3],[1,0],[3,1],[5,1],[2,2],[2,0],[2,0],[0,2],[2,0],[0,2],[1,0],[2,1],[3,0],[0,2],[0,1],[2,2],[1,0],[1,1],[0,2],[2,1],[0,2],[2,1],[0,2],[0,3],[1,3],[2,1],[2,0],[1,5],[1,1],[1,3],[0,1],[0,1],[3,1]]},
+  {nome:"Mariana Claret Rodrigues",palpites:[[1,1],[1,1],[1,1],[2,1],[0,2],[2,1],[0,2],[1,2],[3,0],[2,1],[1,1],[1,0],[3,0],[2,0],[0,2],[1,0],[2,1],[0,2],[3,0],[2,0],[2,0],[2,1],[1,0],[1,2],[1,0],[1,1],[2,1],[1,1],[2,1],[1,1],[3,0],[1,1],[2,0],[2,1],[2,0],[1,1],[2,0],[2,1],[2,0],[0,1],[2,1],[3,0],[1,1],[0,1],[2,0],[2,0],[0,1],[1,1],[1,1],[2,0],[2,0],[2,0],[0,1],[1,1],[1,2],[1,1],[1,2],[0,2],[1,1],[0,2],[1,1],[0,3],[1,1],[1,1],[1,2],[2,0],[0,3],[1,1],[1,1],[1,1],[0,3],[1,1]]},
+  {nome:"Marina Silva Dantas",palpites:[[2,1],[1,1],[2,1],[2,1],[0,2],[2,1],[0,2],[1,1],[3,0],[2,1],[1,1],[1,0],[3,0],[2,1],[1,2],[2,0],[3,1],[0,2],[3,0],[2,0],[2,0],[2,1],[2,0],[1,3],[1,0],[2,1],[3,0],[3,0],[3,1],[1,1],[4,0],[2,0],[1,1],[2,1],[2,0],[0,3],[3,0],[2,1],[3,1],[0,1],[2,1],[4,0],[1,2],[0,1],[3,0],[4,0],[0,3],[2,1],[1,1],[0,1],[2,0],[3,0],[0,2],[1,2],[1,2],[1,2],[0,2],[1,3],[2,1],[0,2],[1,1],[0,4],[1,1],[1,2],[1,1],[3,0],[0,4],[1,1],[1,1],[1,0],[0,3],[2,1]]},
+  {nome:"Nelson Souza",palpites:[[2,0],[1,1],[1,1],[0,0],[0,1],[0,0],[0,3],[0,2],[5,0],[2,1],[2,1],[2,0],[3,0],[2,0],[0,2],[0,0],[3,1],[0,3],[2,0],[2,0],[2,0],[1,1],[1,0],[0,2],[2,0],[1,1],[1,0],[1,1],[2,0],[1,1],[4,0],[2,1],[2,1],[2,1],[4,0],[0,2],[3,0],[2,0],[2,0],[0,2],[2,1],[4,0],[2,1],[0,2],[2,0],[2,1],[0,3],[3,0],[1,1],[2,0],[1,0],[3,0],[1,1],[1,1],[2,1],[1,0],[1,2],[0,2],[1,1],[0,2],[2,1],[0,3],[0,0],[2,3],[2,3],[1,0],[0,3],[0,1],[2,3],[0,0],[0,2],[2,1]]},
+  {nome:"Paulo Magalhães Castro",palpites:[[2,0],[1,1],[2,1],[2,0],[0,2],[2,1],[0,3],[1,2],[3,0],[2,1],[1,1],[2,0],[4,0],[2,0],[0,2],[1,0],[3,1],[0,2],[3,0],[2,0],[2,0],[1,1],[2,1],[1,2],[1,0],[2,0],[3,1],[2,1],[3,1],[1,2],[5,0],[1,1],[1,1],[2,1],[2,0],[0,1],[2,0],[2,1],[3,1],[0,2],[2,1],[2,0],[2,2],[0,1],[3,1],[3,1],[0,2],[2,0],[1,1],[2,1],[2,0],[3,0],[0,2],[1,2],[1,2],[1,1],[1,2],[0,2],[2,2],[0,3],[1,1],[0,4],[1,1],[1,2],[1,3],[2,0],[0,4],[1,2],[1,2],[0,1],[0,4],[2,1]]},
+  {nome:"Pedro Castro",palpites:[[2,0],[1,1],[1,2],[2,0],[0,2],[2,2],[1,1],[1,2],[5,0],[1,1],[2,1],[2,0],[4,0],[2,0],[0,2],[1,0],[2,0],[0,2],[3,0],[2,0],[3,0],[2,1],[2,1],[0,2],[2,0],[1,0],[2,1],[2,1],[2,1],[0,2],[4,0],[1,1],[1,0],[2,1],[3,0],[0,2],[3,0],[2,0],[3,1],[1,2],[2,0],[3,0],[1,2],[1,2],[3,1],[3,0],[0,2],[2,0],[1,1],[1,2],[3,1],[3,0],[0,1],[0,1],[1,2],[1,0],[1,2],[0,2],[2,1],[0,4],[1,1],[0,2],[1,2],[1,2],[1,2],[2,0],[0,2],[2,1],[1,2],[1,1],[0,2],[2,1]]},
+  {nome:"Pedro Peltier Rocha",palpites:[[1,0],[1,1],[1,1],[1,1],[1,2],[2,1],[1,2],[1,1],[3,0],[1,0],[1,1],[1,1],[3,0],[2,1],[1,2],[2,1],[2,0],[0,2],[2,0],[1,0],[2,0],[1,0],[1,1],[1,2],[1,1],[1,0],[1,1],[1,1],[1,1],[0,1],[3,0],[1,1],[2,1],[2,1],[2,0],[0,1],[3,0],[1,0],[2,0],[1,2],[2,0],[3,0],[2,1],[0,1],[2,0],[2,0],[1,2],[2,1],[1,0],[1,1],[2,0],[2,0],[1,1],[1,1],[1,1],[1,1],[0,1],[1,2],[1,1],[0,2],[1,0],[0,2],[1,1],[1,2],[1,1],[2,1],[0,3],[1,1],[0,1],[1,1],[0,2],[2,1]]},
+  {nome:"Raimundo Vieira Barros",palpites:[[2,1],[2,1],[3,1],[2,1],[0,2],[3,1],[0,2],[2,2],[3,0],[3,2],[1,1],[2,0],[4,0],[2,1],[1,2],[1,0],[2,0],[1,2],[2,1],[2,0],[3,0],[2,2],[2,1],[0,2],[2,1],[2,1],[2,0],[2,1],[2,1],[2,2],[3,0],[2,1],[1,1],[2,1],[2,0],[1,2],[2,0],[2,0],[2,0],[1,2],[2,0],[3,0],[2,2],[2,3],[3,0],[2,0],[1,2],[2,0],[1,1],[2,1],[3,1],[2,0],[1,1],[1,2],[1,2],[1,1],[1,2],[0,2],[1,1],[0,3],[1,1],[0,4],[1,2],[1,2],[1,3],[2,0],[0,4],[1,2],[2,2],[1,1],[0,3],[2,1]]},
+  {nome:"Rane Razoni Rocha",palpites:[[2,0],[1,1],[2,0],[2,0],[0,2],[2,1],[0,2],[1,2],[3,0],[2,1],[1,1],[2,0],[3,0],[2,0],[0,2],[2,0],[2,1],[0,2],[3,0],[2,0],[3,0],[2,1],[2,0],[0,2],[2,0],[3,1],[2,1],[1,1],[2,1],[1,2],[4,0],[2,0],[1,0],[2,1],[3,0],[0,2],[3,0],[2,1],[2,0],[0,1],[2,1],[3,0],[1,2],[0,2],[2,0],[2,0],[0,3],[2,0],[1,1],[1,2],[2,0],[3,0],[0,2],[1,2],[1,1],[0,2],[1,2],[0,2],[1,1],[0,2],[1,1],[0,3],[1,1],[1,2],[0,2],[3,0],[0,3],[0,1],[1,2],[0,1],[0,4],[2,1]]},
+  {nome:"Renato de Mello Guimarães Lôbo",palpites:[[3,1],[2,0],[1,0],[1,4],[1,1],[3,0],[0,1],[2,0],[3,0],[2,1],[0,2],[2,1],[3,0],[1,0],[0,2],[1,0],[3,1],[1,1],[3,0],[1,1],[3,0],[1,3],[1,1],[0,2],[1,2],[1,0],[0,2],[2,0],[1,0],[1,1],[2,0],[1,3],[3,0],[3,0],[1,0],[0,1],[3,0],[1,0],[2,0],[1,1],[3,0],[3,0],[1,1],[1,0],[2,0],[2,0],[0,3],[2,0],[1,2],[0,0],[2,0],[1,2],[0,1],[1,3],[2,0],[3,0],[1,3],[1,0],[1,2],[0,2],[0,1],[0,2],[0,1],[1,2],[0,3],[1,0],[0,2],[0,1],[1,3],[1,1],[0,3],[2,0]]},
+  {nome:"Sofia Claret Reis",palpites:[[2,0],[1,1],[1,1],[2,1],[0,1],[2,1],[1,1],[1,1],[2,0],[2,0],[1,1],[1,1],[2,0],[2,0],[1,1],[1,1],[2,0],[1,2],[2,0],[2,1],[2,0],[2,0],[2,1],[1,2],[1,0],[2,0],[2,1],[1,1],[1,0],[1,2],[3,0],[1,1],[1,1],[2,1],[2,0],[1,2],[2,1],[2,1],[2,0],[0,2],[1,1],[3,0],[1,1],[0,1],[2,0],[2,1],[1,1],[2,1],[1,1],[0,1],[2,0],[2,0],[1,1],[1,2],[1,2],[2,0],[1,1],[1,2],[1,1],[1,2],[1,1],[0,2],[1,0],[1,1],[1,1],[2,0],[1,3],[1,1],[1,1],[0,1],[1,2],[2,0]]},
+  {nome:"Sueli de Souza Borges",palpites:[[2,0],[1,1],[2,1],[2,0],[2,0],[2,1],[2,0],[2,1],[4,0],[2,1],[2,1],[1,0],[3,0],[2,0],[1,3],[0,1],[2,2],[0,1],[5,0],[1,1],[4,1],[3,1],[1,1],[1,4],[1,3],[1,1],[3,2],[2,2],[2,1],[1,2],[3,0],[2,3],[4,0],[5,0],[1,0],[0,3],[4,1],[3,0],[2,1],[0,0],[5,1],[4,0],[1,2],[0,0],[3,0],[4,1],[1,1],[3,1],[1,2],[0,2],[2,1],[3,0],[2,2],[1,2],[0,3],[2,2],[1,4],[0,0],[3,0],[1,4],[0,0],[1,4],[2,0],[2,2],[1,3],[3,1],[1,3],[1,1],[3,2],[0,0],[1,3],[1,0]]},
+  {nome:"Thiago Neves da Rocha Reis",palpites:[[1,1],[1,0],[2,1],[2,0],[0,2],[2,1],[0,2],[1,0],[3,0],[1,1],[1,1],[1,0],[3,0],[3,0],[0,1],[1,1],[3,1],[1,2],[2,0],[2,0],[2,0],[2,1],[2,0],[0,2],[1,1],[2,0],[2,1],[1,0],[1,0],[1,1],[3,0],[1,1],[1,1],[2,1],[2,0],[1,1],[2,0],[3,1],[2,0],[1,1],[2,1],[3,0],[2,1],[0,1],[2,0],[2,1],[0,2],[2,0],[1,0],[1,1],[2,0],[2,0],[0,1],[1,2],[1,2],[1,0],[1,3],[0,2],[1,1],[1,2],[1,1],[1,3],[0,1],[1,2],[1,2],[2,0],[0,3],[1,1],[1,0],[0,1],[1,2],[1,1]]},
+];
+
+// ============================================================
+// MAPEAMENTO COMPLETO nomes API → PT
+// ============================================================
+const MAP_API = {
+  'Mexico':'México','South Africa':'África do Sul','Korea Republic':'Coreia do Sul',
+  'Czechia':'República Tcheca','Canada':'Canadá',
+  'Bosnia-Herzegovina':'Bósnia e Herzegovina','Bosnia and Herzegovina':'Bósnia e Herzegovina',
+  'United States':'Estados Unidos','Paraguay':'Paraguai','Australia':'Austrália','Turkey':'Turquia',
+  'Qatar':'Catar','Switzerland':'Suíça','Brazil':'Brasil','Morocco':'Marrocos',
+  'Haiti':'Haiti','Scotland':'Escócia','Germany':'Alemanha',
+  "Curaçao":'Curaçao','Curacao':'Curaçao',
+  'Netherlands':'Holanda','Japan':'Japão',"Ivory Coast":'Costa do Marfim',
+  'Ecuador':'Equador','Sweden':'Suécia','Tunisia':'Tunísia',
+  'Spain':'Espanha','Cape Verde':'Cabo Verde','Belgium':'Bélgica',
+  'Egypt':'Egito','Saudi Arabia':'Arábia Saudita','Uruguay':'Uruguai',
+  'Iran':'Irã','New Zealand':'Nova Zelândia',
+  'France':'França','Senegal':'Senegal','Iraq':'Iraque','Norway':'Noruega',
+  'Argentina':'Argentina','Algeria':'Argélia','Austria':'Áustria','Jordan':'Jordânia',
+  'Portugal':'Portugal','DR Congo':'DR Congo','England':'Inglaterra',
+  'Croatia':'Croácia','Ghana':'Gana','Panama':'Panamá',
+  'Uzbekistan':'Uzbequistão','Colombia':'Colômbia',
+};
+
+// ============================================================
+// ESTADO
+// ============================================================
+let resultados = {};
+let apostadoresSelecionados = new Set(APOSTADORES.map(a=>a.nome));
+let filtroResultado = '';
+let filtroDatas = new Set();
+let periodoClass = 'geral';
+let ultimaAtualizacao = null;
+let timerAutoRefresh = null;
+
+const datasUnicas = [...new Set(JOGOS.map(j=>j.data))].sort();
+
+// ============================================================
+// UTIL
+// ============================================================
+function fmtData(d) {
+  const [y,m,dia] = d.split('-');
+  const meses=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const diasSem=['dom','seg','ter','qua','qui','sex','sáb'];
+  const dt = new Date(+y, +m-1, +dia);
+  return `${diasSem[dt.getDay()]} ${+dia}/${meses[+m-1]}`;
+}
+function isHoje(d) {
+  const h = new Date();
+  const [y,m,dia] = d.split('-');
+  return +y===h.getFullYear() && +m===(h.getMonth()+1) && +dia===h.getDate();
+}
+function calcPontos(palpite, resultado) {
+  if (!resultado) return null;
+  const [p1,p2]=palpite, {g1,g2}=resultado;
+  const rP=p1>p2?1:p1<p2?-1:0, rR=g1>g2?1:g1<g2?-1:0;
+  if (rP!==rR) {
+    // Errou o vencedor: ganha 1 ponto se acertou os gols de algum time
+    return (p1===g1||p2===g2)?1:0;
+  }
+  return 3+(p1===g1?1:0)+(p2===g2?1:0);
+}
+function getResultadoTipo(g1,g2){return g1>g2?'time1':g1<g2?'time2':'empate'}
+
+// ============================================================
+// API — busca em tempo real, atualiza a cada 2 min durante jogos
+// ============================================================
+async function buscarResultados(manual=false) {
+  const dot=document.getElementById('api-dot'), txt=document.getElementById('api-txt');
+  dot.className='api-dot loading';
+  txt.textContent=manual?'Atualizando...':'Buscando resultados...';
+  if(timerAutoRefresh){clearTimeout(timerAutoRefresh);timerAutoRefresh=null;}
+  try {
+    const resp = await fetch('https://corsproxy.io/?https://api.football-data.org/v4/competitions/WC/matches?season=2026', {
+  headers: { 'X-Auth-Token': 'f6f4851ee1ec4ec6a5405a6df8023ff8' }
+});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const data = await resp.json();
+    let count = 0;
+    let temAoVivo = false;
+
+    (data.matches||[]).forEach(m => {
+      const status = m.status; // 'FINISHED', 'IN_PLAY', 'PAUSED', 'SCHEDULED', 'TIMED'
+      const aoVivo = status === 'IN_PLAY' || status === 'PAUSED';
+      if(aoVivo) temAoVivo = true;
+
+      if(status !== 'FINISHED' && !aoVivo) return;
+
+      const g1api = m.score?.fullTime?.home ?? m.score?.halfTime?.home;
+      const g2api = m.score?.fullTime?.away ?? m.score?.halfTime?.away;
+      if(g1api === null || g1api === undefined) return;
+
+      const t1api = MAP_API[m.homeTeam?.name] || m.homeTeam?.shortName || m.homeTeam?.name;
+      const t2api = MAP_API[m.awayTeam?.name] || m.awayTeam?.shortName || m.awayTeam?.name;
+
+      const jogo = JOGOS.find(j =>
+        (j.t1===t1api && j.t2===t2api) || (j.t1===t2api && j.t2===t1api)
+      );
+      if(!jogo) return;
+
+      const inv = jogo.t1 === t2api;
+      resultados[jogo.id] = {
+        g1: inv ? g2api : g1api,
+        g2: inv ? g1api : g2api,
+        aoVivo: aoVivo,
+        minuto: m.minute || null
+      };
+      count++;
+    });
+
+    ultimaAtualizacao = new Date();
+    dot.className = 'api-dot ok';
+    txt.textContent = `${count} resultado(s) · ${ultimaAtualizacao.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+    renderPalpites(); renderClassificacao();
+
+    // Atualiza a cada 30s se tiver jogo ao vivo, senão a cada 10min
+    const agora = Date.now(), fim = new Date('2026-07-20').getTime();
+    if(agora <= fim) timerAutoRefresh = setTimeout(()=>buscarResultados(), temAoVivo ? 30*1000 : 10*60*1000);
+
+  } catch(e) {
+    console.error(e);
+    dot.className='api-dot err';
+    txt.textContent='Erro · clique para tentar';
+    timerAutoRefresh = setTimeout(()=>buscarResultados(), 60*1000);
+  }
+}
+// ============================================================
+// LIMPAR FILTROS
+// ============================================================
+function limparApostadores(){
+  apostadoresSelecionados=new Set(APOSTADORES.map(a=>a.nome));
+  document.querySelectorAll('.pill[data-nome]').forEach(p=>p.classList.add('selected'));
+  document.querySelector('.pill-all').classList.add('selected');
+  renderPalpites();
+}
+function limparDatas(){
+  filtroDatas.clear();
+  document.querySelectorAll('.data-btn[data-val]').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.data-btn[data-val="todos"]').classList.add('active');
+  renderPalpites();
+}
+function limparResultado(){
+  filtroResultado='';
+  document.querySelectorAll('#filter-resultado .ftag').forEach(t=>{t.classList.remove('active');if(t.dataset.val==='')t.classList.add('active');});
+  renderPalpites();
+}
+function limparPlacar(){document.getElementById('filter-placar').value='';renderPalpites();}
+function limparTudo(){limparApostadores();limparDatas();limparResultado();limparPlacar();}
+
+// ============================================================
+// NAV
+// ============================================================
+function showSection(id,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  if(id==='classificacao')renderClassificacao();
+}
+
+// ============================================================
+// PILLS
+// ============================================================
+function initPills(){
+  const wrap=document.getElementById('pills-apostadores');
+  const all=document.createElement('span');
+  all.className='pill pill-all selected'; all.textContent='Todos';
+  all.onclick=()=>{
+    const tod=apostadoresSelecionados.size===APOSTADORES.length;
+    tod?apostadoresSelecionados.clear():APOSTADORES.forEach(a=>apostadoresSelecionados.add(a.nome));
+    all.classList.toggle('selected',!tod);
+    document.querySelectorAll('.pill[data-nome]').forEach(p=>p.classList.toggle('selected',!tod));
+    renderPalpites();
+  };
+  wrap.appendChild(all);
+  APOSTADORES.forEach(a=>{
+    const p=document.createElement('span');
+    p.className='pill selected'; p.dataset.nome=a.nome;
+    const pts=a.nome.split(' ');
+    p.textContent=pts[0]+(pts.length>1?' '+pts[pts.length-1]:'');
+    p.title=a.nome;
+    p.onclick=()=>{
+      apostadoresSelecionados.has(a.nome)?apostadoresSelecionados.delete(a.nome):apostadoresSelecionados.add(a.nome);
+      p.classList.toggle('selected',apostadoresSelecionados.has(a.nome));
+      document.querySelector('.pill-all').classList.toggle('selected',apostadoresSelecionados.size===APOSTADORES.length);
+      renderPalpites();
+    };
+    wrap.appendChild(p);
+  });
+}
+
+// ============================================================
+// BOTÕES DATA
+// ============================================================
+function initDataBtns(){
+  const wrap=document.getElementById('data-btns');
+  const all=document.createElement('button');
+  all.className='data-btn active'; all.dataset.val='todos'; all.textContent='Todos';
+  all.onclick=()=>{filtroDatas.clear();document.querySelectorAll('.data-btn[data-val]').forEach(b=>b.classList.remove('active'));all.classList.add('active');renderPalpites();};
+  wrap.appendChild(all);
+  datasUnicas.forEach(d=>{
+    const btn=document.createElement('button');
+    const hoje=isHoje(d);
+    btn.className='data-btn'+(hoje?' hoje':''); btn.dataset.val=d;
+    // 🟢 emoji de bola de futebol para hoje
+    btn.textContent=fmtData(d)+(hoje?' ⚽':'');
+    btn.onclick=()=>{
+      filtroDatas.has(d)?filtroDatas.delete(d):filtroDatas.add(d);
+      btn.classList.toggle('active',filtroDatas.has(d));
+      all.classList.toggle('active',filtroDatas.size===0);
+      renderPalpites();
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+// ============================================================
+// FILTRO RESULTADO
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('#filter-resultado .ftag').forEach(tag=>{
+    tag.onclick=()=>{
+      document.querySelectorAll('#filter-resultado .ftag').forEach(t=>t.classList.remove('active'));
+      tag.classList.add('active'); filtroResultado=tag.dataset.val; renderPalpites();
+    };
+  });
+});
+
+// ============================================================
+// RENDER PALPITES
+// ============================================================
+function renderPalpites(){
+  const apSel=APOSTADORES.filter(a=>apostadoresSelecionados.has(a.nome));
+  const placarFiltro=document.getElementById('filter-placar').value.trim().toLowerCase();
+  const content=document.getElementById('palpites-content');
+  if(!apSel.length){content.innerHTML='<div class="empty">Selecione pelo menos um apostador.</div>';return;}
+  let jogosFiltro=filtroDatas.size>0?JOGOS.filter(j=>filtroDatas.has(j.data)):JOGOS;
+  const porData={};
+  jogosFiltro.forEach(j=>{
+    if(filtroResultado||placarFiltro){
+      const ok=apSel.some(a=>{
+        const p=a.palpites[j.id-1];
+        if(filtroResultado&&getResultadoTipo(p[0],p[1])!==filtroResultado)return false;
+        if(placarFiltro&&`${p[0]}x${p[1]}`!==placarFiltro)return false;
+        return true;
+      });
+      if(!ok)return;
+    }
+    if(!porData[j.data])porData[j.data]=[];
+    porData[j.data].push(j);
+  });
+  let html='';
+  Object.keys(porData).sort().forEach(data=>{
+    const jogos=porData[data]; if(!jogos.length)return;
+    const hoje=isHoje(data);
+    html+=`<div class="dia-section">
+      <div class="dia-header">
+        <span class="dia-label">${fmtData(data)}${hoje?' ⚽':''}</span>
+        <span class="dia-line"></span>
+        <span class="dia-count">${jogos.length} jogo(s)</span>
+      </div>
+      <div class="palpites-table-wrap"><table class="palpites-table">
+        <thead><tr>
+          <th class="left" style="min-width:80px">Horário / Local</th>
+          <th class="left">Time 1</th>
+          <th style="min-width:70px">Resultado</th>
+          <th class="left">Time 2</th>
+          ${apSel.map(a=>{const pts=a.nome.split(' ');return`<th class="apostador-header" title="${a.nome}">${pts[0]}<br>${pts[pts.length-1]}</th>`}).join('')}
+        </tr></thead><tbody>`;
+    jogos.forEach(j=>{
+      const res=resultados[j.id];
+      const resHtml=res
+        ?`<span class="placar-real ${res.aoVivo ? 'ao-vivo' : ''}">${res.g1} × ${res.g2}${res.aoVivo ? ` <span style="font-size:.55rem;background:#f87171;color:#000;padding:1px 4px;border-radius:3px;font-weight:700">LIVE${res.minuto?` ${res.minuto}'`:''}</span>` : ''}</span>`
+        :`<span class="placar-real pendente">- × -</span>`;
+      const cells=apSel.map(a=>{
+        const p=a.palpites[j.id-1];
+        if(filtroResultado&&getResultadoTipo(p[0],p[1])!==filtroResultado)return'<td>—</td>';
+        if(placarFiltro&&`${p[0]}x${p[1]}`!==placarFiltro)return'<td>—</td>';
+        const pts=calcPontos(p,res);
+        const pc=pts===null?'pts-p':`pts-${Math.min(pts,5)}`;
+        return`<td><div class="cell-palpite">${p[0]}×${p[1]}<span class="pts-badge ${pc}">${pts===null?'?':pts}</span></div></td>`;
+      }).join('');
+      html+=`<tr>
+        <td><div class="hora-cell">${j.hora}</div><div style="font-size:.65rem;color:var(--texto2)">${j.local}</div></td>
+        <td class="time-nome">${j.t1}</td>
+        <td>${resHtml}</td>
+        <td class="time-nome">${j.t2}</td>
+        ${cells}
+      </tr>`;
+    });
+    html+='</tbody></table></div></div>';
+  });
+  content.innerHTML=html||'<div class="empty">Nenhum jogo encontrado.</div>';
+}
+
+// ============================================================
+// CLASSIFICAÇÃO
+// ============================================================
+function initPeriodos(){
+  const wrap=document.getElementById('periodo-wrap');
+  datasUnicas.forEach(d=>{
+    const btn=document.createElement('button');
+    btn.className='periodo-btn'; btn.dataset.periodo=d;
+    btn.textContent=fmtData(d)+(isHoje(d)?' ⚽':'');
+    btn.onclick=function(){selectPeriodo(this,d);};
+    wrap.appendChild(btn);
+  });
+}
+function selectPeriodo(btn,p){
+  document.querySelectorAll('.periodo-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); periodoClass=p; renderClassificacao();
+}
+// Critérios de desempate (em ordem): cheios → jogo 6 → jogo 31 → jogo 51 → jogo 64 → jogo 65 → jogo 22
+const DESEMPATE_JOGOS=[6,31,51,64,65,22];
+function getPtsJogo(apostador,id){
+  const res=resultados[id]; if(!res) return -1;
+  return calcPontos(apostador.palpites[id-1],res);
+}
+function cmpDesempate(a,b){
+  if(b.cheios!==a.cheios) return b.cheios-a.cheios;
+  for(const id of DESEMPATE_JOGOS){
+    const pa=getPtsJogo(a._ap,id), pb=getPtsJogo(b._ap,id);
+    if(pb!==pa) return pb-pa;
+  }
+  return 0;
+}
+function renderClassificacao(){
+  const content=document.getElementById('class-content');
+  const jogosIds=periodoClass==='geral'?JOGOS.map(j=>j.id):JOGOS.filter(j=>j.data===periodoClass).map(j=>j.id);
+  const ranking=APOSTADORES.map(a=>{
+    let total=0,jogados=0,cheios=0;
+    jogosIds.forEach(id=>{
+      const res=resultados[id]; if(!res)return;
+      const pts=calcPontos(a.palpites[id-1],res);
+      if(pts!==null){total+=pts;jogados++;if(pts===5)cheios++;}
+    });
+    return{nome:a.nome,total,jogados,cheios,_ap:a};
+  }).sort((a,b)=>{
+    if(b.total!==a.total) return b.total-a.total;
+    // Aplica critérios de desempate apenas na classificação geral
+    if(periodoClass==='geral') return cmpDesempate(a,b);
+    return b.cheios-a.cheios;
+  });
+  const totalJogos=jogosIds.length, comRes=jogosIds.filter(id=>resultados[id]).length;
+  let html=`<div class="info-banner"><b>${comRes}</b> de <b>${totalJogos}</b> jogos com resultado${comRes===0?' — aguardando jogos...':'.'}</div>`;
+  html+=`<div class="rank-card">
+      <div class="rank-card-title">🏆 Classificação ${periodoClass==='geral'?'Geral':fmtData(periodoClass)}</div>
+      <table class="rank-table"><thead><tr><th style="width:32px">#</th><th>Apostador</th><th class="r">Pts</th><th class="r">Jogos</th><th class="r">⭐5pts</th></tr></thead><tbody>`;
+  ranking.forEach((r,i)=>{
+    const pc=i===0?'p1':i===1?'p2':i===2?'p3':'',med=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    html+=`<tr><td><span class="rank-pos ${pc}">${med||(i+1)}</span></td><td class="rank-nome">${r.nome}</td><td class="r rank-pts">${r.total}</td><td class="r rank-sub">${r.jogados}/${totalJogos}</td><td class="r rank-sub">${r.cheios}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  content.innerHTML=html;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initPills();
+initDataBtns();
+initPeriodos();
+renderPalpites();
+buscarResultados();
+</script>
+</body>
+</html>
