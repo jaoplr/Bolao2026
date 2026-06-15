@@ -384,6 +384,7 @@ const MAP_API = {
 // ESTADO
 // ============================================================
 let resultados = {};
+let primeiraAtualizacao = false;
 let apostadoresSelecionados = new Set(APOSTADORES.map(a=>a.nome));
 let filtroResultado = '';
 let filtroDatas = new Set();
@@ -460,12 +461,13 @@ async function buscarResultados(manual=false) {
       resultados[jogo.id] = {
         g1: inv ? g2api : g1api,
         g2: inv ? g1api : g2api,
-        aoVivo: aoVivo,
+        aoVivo: primeiraAtualizacao ? aoVivo : false,
         minuto: m.minute || null
       };
       count++;
     });
 
+    primeiraAtualizacao = true;
     ultimaAtualizacao = new Date();
     dot.className = 'api-dot ok';
     txt.textContent = `${count} resultado(s) · ${ultimaAtualizacao.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
