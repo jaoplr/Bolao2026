@@ -438,14 +438,15 @@ async function buscarResultados(manual=false) {
     let temAoVivo = false;
 
     (data.matches||[]).forEach(m => {
-      const status = m.status; // 'FINISHED', 'IN_PLAY', 'PAUSED', 'SCHEDULED', 'TIMED'
-      const aoVivo = status === 'IN_PLAY' || status === 'PAUSED';
+      const status = m.status;
+      const temPlacarFinal = m.score?.fullTime?.home !== null && m.score?.fullTime?.home !== undefined;
+      const aoVivo = (status === 'IN_PLAY' || status === 'PAUSED') && !temPlacarFinal;
       if(aoVivo) temAoVivo = true;
-
-      if(status !== 'FINISHED' && !aoVivo) return;
-
-      const g1api = m.score?.fullTime?.home ?? m.score?.halfTime?.home;
-      const g2api = m.score?.fullTime?.away ?? m.score?.halfTime?.away;
+      
+      if(status !== 'FINISHED' && !aoVivo && !temPlacarFinal) return;
+      
+      const g1api = temPlacarFinal ? m.score.fullTime.home : m.score?.halfTime?.home;
+      const g2api = temPlacarFinal ? m.score.fullTime.away : m.score?.halfTime?.away;
       if(g1api === null || g1api === undefined) return;
 
       const t1api = MAP_API[m.homeTeam?.name] || m.homeTeam?.shortName || m.homeTeam?.name;
