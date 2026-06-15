@@ -439,14 +439,13 @@ async function buscarResultados(manual=false) {
 
     (data.matches||[]).forEach(m => {
       const status = m.status;
-      const temPlacarFinal = m.score?.fullTime?.home !== null && m.score?.fullTime?.home !== undefined;
-      const aoVivo = (status === 'IN_PLAY' || status === 'PAUSED') && !temPlacarFinal;
+      const aoVivo = status === 'IN_PLAY' || status === 'PAUSED';
       if(aoVivo) temAoVivo = true;
       
       if(status !== 'FINISHED' && !aoVivo && !temPlacarFinal) return;
       
-      const g1api = temPlacarFinal ? m.score.fullTime.home : m.score?.halfTime?.home;
-      const g2api = temPlacarFinal ? m.score.fullTime.away : m.score?.halfTime?.away;
+      const g1api = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? m.score?.regularTime?.home;
+      const g2api = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? m.score?.regularTime?.away;
       if(g1api === null || g1api === undefined) return;
 
       const t1api = MAP_API[m.homeTeam?.name] || m.homeTeam?.shortName || m.homeTeam?.name;
