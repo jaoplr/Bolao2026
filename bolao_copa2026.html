@@ -442,7 +442,7 @@ async function buscarResultados(manual=false) {
       const aoVivo = status === 'IN_PLAY' || status === 'PAUSED';
       if(aoVivo) temAoVivo = true;
       
-      if(status !== 'FINISHED' && !aoVivo && !temPlacarFinal) return;
+      if(status !== 'FINISHED' && !aoVivo &&) return;
       
       const g1api = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? m.score?.regularTime?.home;
       const g2api = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? m.score?.regularTime?.away;
