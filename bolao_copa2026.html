@@ -321,23 +321,63 @@ const APOSTADORES = [
 // MAPEAMENTO COMPLETO nomes API → PT
 // ============================================================
 const MAP_API = {
-  'Mexico':'México','South Africa':'África do Sul','Korea Republic':'Coreia do Sul',
-  'Czechia':'República Tcheca','Canada':'Canadá',
-  'Bosnia-Herzegovina':'Bósnia e Herzegovina','Bosnia and Herzegovina':'Bósnia e Herzegovina',
-  'United States':'Estados Unidos','Paraguay':'Paraguai','Australia':'Austrália','Turkey':'Turquia',
-  'Qatar':'Catar','Switzerland':'Suíça','Brazil':'Brasil','Morocco':'Marrocos',
-  'Haiti':'Haiti','Scotland':'Escócia','Germany':'Alemanha',
-  "Curaçao":'Curaçao','Curacao':'Curaçao',
-  'Netherlands':'Holanda','Japan':'Japão',"Ivory Coast":'Costa do Marfim',
-  'Ecuador':'Equador','Sweden':'Suécia','Tunisia':'Tunísia',
-  'Spain':'Espanha','Cape Verde':'Cabo Verde','Belgium':'Bélgica',
-  'Egypt':'Egito','Saudi Arabia':'Arábia Saudita','Uruguay':'Uruguai',
-  'Iran':'Irã','New Zealand':'Nova Zelândia',
-  'France':'França','Senegal':'Senegal','Iraq':'Iraque','Norway':'Noruega',
-  'Argentina':'Argentina','Algeria':'Argélia','Austria':'Áustria','Jordan':'Jordânia',
-  'Portugal':'Portugal','DR Congo':'DR Congo','England':'Inglaterra',
-  'Croatia':'Croácia','Ghana':'Gana','Panama':'Panamá',
-  'Uzbekistan':'Uzbequistão','Colombia':'Colômbia',
+  'Mexico':'México',
+  'South Africa':'África do Sul',
+  'Korea Republic':'Coreia do Sul',
+  'South Korea':'Coreia do Sul',
+  'Czechia':'República Tcheca',
+  'Czech Republic':'República Tcheca',
+  'Canada':'Canadá',
+  'Bosnia-Herzegovina':'Bósnia e Herzegovina',
+  'Bosnia and Herzegovina':'Bósnia e Herzegovina',
+  'Bosnia & Herzegovina':'Bósnia e Herzegovina',
+  'United States':'Estados Unidos',
+  'USA':'Estados Unidos',
+  'Paraguay':'Paraguai',
+  'Australia':'Austrália',
+  'Turkey':'Turquia',
+  'Qatar':'Catar',
+  'Switzerland':'Suíça',
+  'Brazil':'Brasil',
+  'Morocco':'Marrocos',
+  'Haiti':'Haiti',
+  'Scotland':'Escócia',
+  'Germany':'Alemanha',
+  'Curaçao':'Curaçao',
+  'Curacao':'Curaçao',
+  'Netherlands':'Holanda',
+  'Japan':'Japão',
+  'Ivory Coast':'Costa do Marfim',
+  "Côte d'Ivoire":'Costa do Marfim',
+  'Ecuador':'Equador',
+  'Sweden':'Suécia',
+  'Tunisia':'Tunísia',
+  'Spain':'Espanha',
+  'Cape Verde':'Cabo Verde',
+  'Belgium':'Bélgica',
+  'Egypt':'Egito',
+  'Saudi Arabia':'Arábia Saudita',
+  'Uruguay':'Uruguai',
+  'Iran':'Irã',
+  'IR Iran':'Irã',
+  'New Zealand':'Nova Zelândia',
+  'France':'França',
+  'Senegal':'Senegal',
+  'Iraq':'Iraque',
+  'Norway':'Noruega',
+  'Argentina':'Argentina',
+  'Algeria':'Argélia',
+  'Austria':'Áustria',
+  'Jordan':'Jordânia',
+  'Portugal':'Portugal',
+  'DR Congo':'RD Congo',
+  'Congo DR':'RD Congo',
+  'England':'Inglaterra',
+  'Croatia':'Croácia',
+  'Ghana':'Gana',
+  'Panama':'Panamá',
+  'Uzbekistan':'Uzbequistão',
+  'Colombia':'Colômbia',
 };
 
 // ============================================================
@@ -389,8 +429,8 @@ async function buscarResultados(manual=false) {
   txt.textContent=manual?'Atualizando...':'Buscando resultados...';
   if(timerAutoRefresh){clearTimeout(timerAutoRefresh);timerAutoRefresh=null;}
   try {
-    const resp = await fetch('https://corsproxy.io/?https://api.football-data.org/v4/competitions/WC/matches?season=2026', {
-  headers: { 'X-Auth-Token': 'f6f4851ee1ec4ec6a5405a6df8023ff8' }
+    const resp = await fetch('https://corsproxy.io/?https://api.football-data.org/v4/competitions/WC/matches?season=2026&_=' + Date.now(), {
+  headers: { 'X-Auth-Token': 'f6f4851ee1ec4ec6a5405a6df8023ff8', 'Cache-Control': 'no-cache' }
 });
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     const data = await resp.json();
