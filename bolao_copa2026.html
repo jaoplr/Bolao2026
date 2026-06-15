@@ -432,9 +432,7 @@ async function buscarResultados(manual=false) {
   txt.textContent=manual?'Atualizando...':'Buscando resultados...';
   if(timerAutoRefresh){clearTimeout(timerAutoRefresh);timerAutoRefresh=null;}
   try {
-    const resp = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.football-data.org/v4/competitions/WC/matches'), {
-  headers: { 'X-Auth-Token': 'f6f4851ee1ec4ec6a5405a6df8023ff8' }
-});
+    const resp = await fetch('https://blue-snow-6133.jpspaulo2410.workers.dev/');
     if(!resp.ok) throw new Error('HTTP '+resp.status);
     const data = await resp.json();
     let count = 0;
